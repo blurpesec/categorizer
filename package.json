@@ -1,0 +1,17 @@
+{
+  "name": "categorizer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "categorize.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fast-levenshtein": "^2.0.6",
+    "fs": "0.0.1-security",
+    "json": "^9.0.6",
+    "punycode": "^2.1.1"
+  }
+}
