@@ -11,7 +11,7 @@ var totalchecks = 0;
 var totalphishing = 0;
 
 function initialize(){
-
+  console.time("test");
   for(var a = 0; a < test.length; a++){
     totalchecks += 1;
     str = '';
@@ -32,13 +32,14 @@ function initialize(){
   console.log("Total number of checks: " + totalchecks);
   console.log("Total number of phishing: " + totalphishing);
   console.log("Rate of incidence: " + totalphishing/totalchecks);
+  console.timeEnd("test");
 }
 
 initialize();
 
 function normalize(string){
   newstring = '';
-  lookup = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','.'];
+  lookup = ['a','e','i','o','u','l','w','.','h','m','t','b','c','d','f','g','j','k','n','p','q','r','s','v','x','y','z'];
   for(var i = 0; i < string.length; i++){
     for(var c = 0; c < lookup.length; c++){
       if(punydict[lookup[c]].indexOf(string.charAt(i)) > -1){
@@ -47,7 +48,7 @@ function normalize(string){
       }
     }
   }
-  console.log(str + " has been normalized to: " + newstring);
+  //console.log(str + " has been normalized to: " + newstring);
   return newstring;
 }
 
@@ -65,5 +66,5 @@ function checkLevenshtein(input){
   if(smallestleven <= 3){
     totalphishing += 1;
   }
-  console.log("Smallest leven distance " + "for " + input + " is " + smallestleven + " and is " + protect[phishingOf]);
+  //console.log("Smallest leven distance " + "for " + input + " is " + smallestleven + " and is " + protect[phishingOf]);
 }
