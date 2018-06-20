@@ -4,18 +4,23 @@ const punycode = require('punycode');
 const fs = require('fs');
 const fsTwo = require('fs');
 
+const tokenjson = require('./tokens.json');
+
 const filename = './newItems.txt';
 const protect = require('./protect.json');
-var test = require('./domains.json');
 
+var test = require('./domains.json');
 //["myėTHęrwałletz.com", "coinbałłs.com"];
 
 var lengthtotest = 3;
 var str = '';
 var totalchecks = 0;
 var totalphishing = 0;
+var totalscamming = 0;
+var totals = {"phishing": 0,"scamming": 0}
 var scamslist = [];
-var stillneed = [];
+var notphish = [];
+var notphishorscam = [];
 
 function initialize(){
   console.time("test");
@@ -25,35 +30,47 @@ function initialize(){
     str = '';
     var newstring = '';
     str = test[a];
-    //console.log("feeding in: " + str);
     str = str   .replace('http://','')
                 .replace('https://','')
                 .replace('[.]','.')
                 .replace('www.','')
                 .split(/[/?#]/)[0]
                 .toLowerCase();
-    //console.log("decode punycode from: " + str + " to: " + punycode.toUnicode(str));
     str = punycode.toUnicode(str);
     newstring = normalize(str)
-    checkLevenshtein(newstring, str);
+    if(checkLevenshtein(newstring, str)){
+      //console.log(str + " determined to be phishing.");
+    }
+    else{
+      if(checkToken(newstring, str)){
+        //console.log(str) + " was detected");
+      }
+
+    }
   }
-  console.log("Total number of checks: " + totalchecks);
-  console.log("Total number of phishing detected: " + totalphishing);
-  console.log("Rate of incidence: " + totalphishing/totalchecks);
   console.timeEnd("test");
+  console.log("Total number of phishing category: " + totalphishing);
+  console.log("Total number of scamming category: " + totalscamming);
+
+  console.log("Total number of positives: " + (totalphishing + totalscamming));
+  console.log("Total number of negatives: " + notphishorscam.length);
+
+  console.log("Total number of checks completed: " + (totalphishing + totalscamming + notphishorscam.length));
+  console.log("Detected rate of incidence: " + (totalphishing + totalscamming)/totalchecks);
+
   console.log("Length of scamslist: " + scamslist.length);
-  console.log("Length of still needed: " + stillneed.length);
+  console.log("Categorizations still needed: " + notphishorscam.length);
   fs.writeFileSync('./scamslist.json', JSON.stringify(scamslist, null, 4), function(e,results){
     if(e) console.log(e);
     else{
-      console.log("Done writing to scamslist.json");
+      //console.log("Done writing to scamslist.json");
       fs.close();
     }
   });
-  fsTwo.writeFileSync('./stillneed.json', JSON.stringify(stillneed, null, 4), function(e,results){
+  fsTwo.writeFileSync('./notphishorscam.json', JSON.stringify(notphishorscam, null, 4), function(e,results){
     if(e) console.log(e);
     else{
-      console.log("Done writing to stillneed.json");
+      //console.log("Done writing to notphishorscam.json");
       fsTwo.close();
     }
   });
@@ -72,7 +89,6 @@ function normalize(string){
       }
     }
   }
-  //console.log(str + " has been normalized to: " + newstring);
   return newstring;
 }
 
@@ -90,10 +106,32 @@ function checkLevenshtein(input, str){
   if(smallestleven <= lengthtotest){
     totalphishing += 1;
     scamslist.push(str);
+    return true;
   }
   if(smallestleven > lengthtotest){
-    stillneed.push(str);
+    notphish.push(str);
+    return false;
   }
+}
 
-  //console.log("Smallest leven distance " + "for " + input + " is " + smallestleven + " and is " + protect[phishingOf]);
+async function checkToken(input, str){
+  for(var y = 0; y < tokenjson.tokens.length; y ++){
+    for(var z = 0; z < tokenjson.tokens[y].tokens.length; z++){
+      if(input.indexOf(tokenjson.tokens[y].tokens[z]) > -1){
+        scamslist.push(str);
+        var cat = tokenjson.tokens[y].category.toLowerCase();
+        if(cat = "scamming"){
+          totalscamming += 1;
+          return true;
+        }
+        else if(cat = "phishing"){
+          totalphishing += 1;
+          return true;
+        }
+      }
+    }
+  }
+  //if you get to this point, add to notphishorscam.json
+  notphishorscam.push(str);
+  return false;
 }
