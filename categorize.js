@@ -57,14 +57,14 @@ function initialize(){
   console.timeEnd("test");
   console.log("Total number of phishing category: " + totalphishing + " = " + totals[0].phishing + " / " + scamslist.length + " | " + totalphishing/scamslist.length);
   console.log("Total number of scamming category: " + totalscamming + " = " + totals[1].scamming + " / " + scamslist.length + " | " + totalscamming/scamslist.length);
-  console.log("Total number of fake ico category: " + totalfakeico + " = " + totals[2].scamming + " / " + scamslist.length + " | " + totalfakeico/scamslist.length);
+  console.log("Total number of fake ico category: " + totalfakeico + " = " + totals[2].fakeico + " / " + scamslist.length + " | " + totalfakeico/scamslist.length);
 
 
-  console.log("Total number of positives: " + (totalphishing + totalscamming));
+  console.log("Total number of positives: " + (totalphishing + totalscamming + totalfakeico));
   console.log("Total number of negatives: " + notphishorscam.length);
 
-  console.log("Total number of checks completed: " + (totalphishing + totalscamming + notphishorscam.length));
-  console.log("Detected rate of incidence: " + (totalphishing + totalscamming)/totalchecks);
+  console.log("Total number of checks completed: " + (totalphishing + totalscamming + totalfakeico + notphishorscam.length));
+  console.log("Detected rate of incidence: " + (totalphishing + totalscamming + totalfakeico)/totalchecks);
 
   console.log("Length of scamslist: " + scamslist.length);
   console.log("Categorizations still needed: " + notphishorscam.length);
@@ -126,7 +126,8 @@ function checkLevenshtein(input, str){
 }
 
 function checkToken(input, str){
-
+  var cat = "";
+  var subcat = "";
   for(var y = 0; y < tokenjson.cards.length; y ++){
     for(var z = 0; z < tokenjson.cards[y].tokens.length; z++){
       if(input.indexOf(tokenjson.cards[y].tokens[z]) > -1){
@@ -135,34 +136,38 @@ function checkToken(input, str){
         }
         else{*/
           scamslist.push(str);
-          //var cat = tokenjson.tokens[y].category.toLowerCase();
+          var cat = tokenjson.cards[y].category.toLowerCase();
           var subcat = tokenjson.cards[y].subcategory.toLowerCase();
           var name = tokenjson.cards[y].name.toLowerCase();
           //console.log("looking for: " + subcat + " in " + totals.count[1].phishing)\
-
-        //for(var o = 0; o < 50; o++){
+          //console.log(input + " found to be cat = " + cat + "; subcat = " + subcat);
+          //for(var o = 0; o < 50; o++){
           /*if(subcat.indexOf(totals)!= 0){
             console.log("wat da fuck")
           }
           if(subcat.indexOf(totals) = 0){*/ // if subcategory exists in totals, add +1 ; always false;
-            if(tokenjson.cards[y].category = "scamming"){
-              //console.log(JSON.stringify(tokenjson.tokens[y], null, 2))
-              totals[1].scamming += 1;
-              totalscamming += 1;
-              return true;
-            }
-            if(tokenjson.cards[y].category = "phishing"){
-              totals[0].phishing += 1;
-              totalphishing += 1;
-              return true;
-            }
-            if(tokenjson.cards[y].category = "fakeico"){
-              //console.log(input + " was detected as a fakeico category and subcategory: " + subcat + ". Under name: " + name);
-              totals[2].fakeico += 1;
-              totalfakeico += 1;
-              return true;
-            }
-            /*
+          if(cat == "fakeico"){
+            //console.log("fakeico " + input + " found to be cat = " + cat + "; subcat = " + subcat);
+            //console.log(input + " was detected as a fakeico category and subcategory: " + subcat + ". Under name: " + name);
+            totals[2].fakeico += 1;
+            totalfakeico += 1;
+            return true;
+          }
+          if(cat == "scamming"){
+          //  console.log("scamming " + input + " found to be cat = " + cat + "; subcat = " + subcat);
+            //console.log(JSON.stringify(tokenjson.tokens[y], null, 2))
+            totals[1].scamming += 1;
+            totalscamming += 1;
+            return true;
+          }
+          if(cat == "phishing"){
+          //  console.log("phishing " + input + " found to be cat = " + cat + "; subcat = " + subcat);
+            totals[0].phishing += 1;
+            totalphishing += 1;
+            return true;
+          }
+          return true;
+          /*
           }
           else{
             totals.count.push( {[subcat]: 1} );
